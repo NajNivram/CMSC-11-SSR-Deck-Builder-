@@ -6,11 +6,64 @@ get_filename_component(PROJECT_NAME_FROM_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}" NA
 # Replace spaces with underscores
 string(REPLACE " " "_" PROJECT_NAME_SAFE "${PROJECT_NAME_FROM_FOLDER}")
 
-project(${PROJECT_NAME_SAFE} LANGUAGES CXX)
+project(${PROJECT_NAME_SAFE} LANGUAGES C CXX)
 
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# make project folders
+set(PROJECT_FOLDERS
+    Source
+    Include
+    Assets
+    Assets/Fonts
+    Assets/Sprites
+    Assets/Objects
+    Assets/Sounds
+    Assets/Data
+    Assets/Extra
+)
+
+# Create the folders if they don't exist
+foreach(folder ${PROJECT_FOLDERS})
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${folder}")
+endforeach()
+
+# Create a main.c file with a simple raylib example if it doesn't exist
+set(MAIN_C_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Source/main.c")
+
+if(NOT EXISTS "${MAIN_C_PATH}")
+    file(WRITE "${MAIN_C_PATH}"
+"#include \"raylib.h\"
+
+int main(void)
+{
+    const int screenWidth = 1280;
+    const int screenHeight = 720;
+
+    InitWindow(screenWidth, screenHeight, \"TempWindow\");
+
+    SetTargetFPS(60);
+
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+
+        ClearBackground(RAYWHITE);
+
+        EndDrawing();
+    }
+
+    CloseWindow();
+
+    return 0;
+}
+")
+endif()
 
 include(FetchContent)
 
@@ -37,62 +90,9 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SDL3)
 
-# make project folders
-set(PROJECT_FOLDERS
-    Source
-    Include
-    Assets
-    Assets/Fonts
-    Assets/Sprites
-    Assets/Objects
-    Assets/Sounds
-    Assets/Data
-    Assets/Extra
-)
-
-# Create the folders if they don't exist
-foreach(folder ${PROJECT_FOLDERS})
-    file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${folder}")
-endforeach()
-
-# Create a main.cpp file with a simple raylib example if it doesn't exist
-set(MAIN_CPP_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Source/main.cpp")
-
-if(NOT EXISTS "${MAIN_CPP_PATH}")
-    file(WRITE "${MAIN_CPP_PATH}"
-"#include \"raylib.h\"
-
-int main()
-{
-    const int screenWidth = 800;
-    const int screenHeight = 600;
-
-    InitWindow(screenWidth, screenHeight, \"Raylib 6.0 Setup\");
-
-    SetTargetFPS(60);
-
-    while (!WindowShouldClose())
-    {
-        BeginDrawing();
-
-        ClearBackground(BLACK);
-
-        DrawText(\"Raylib is working!\", 20, 20, 24, WHITE);
-
-        DrawCircle(screenWidth / 2, screenHeight / 2, 80, GREEN);
-
-        EndDrawing();
-    }
-
-    CloseWindow();
-
-    return 0;
-}
-")
-endif()
-
 # Gather all source and header files
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp"
 )
 
