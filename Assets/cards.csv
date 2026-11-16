@@ -1,0 +1,36 @@
+Name,Type,Power,Rarity,OncePerEncounter,Price
+5th Degree Cut,0,15,5,1,200
+Laser Flash,2,20,5,1,250
+Genesis,2,15,5,1,300
+Fate's Alignment,2,10,5,0,180
+Tipped Slash,0,12,4,0,80
+Ultimate Regeneration,1,10,4,0,90
+Signal Jammer,2,0,4,0,100
+Blazing Fury,0,10,4,0,85
+Double-Up,2,0,3,0,50
+Bracing Stance,1,0,3,0,45
+Counterattack,0,7,3,0,50
+Magpie,2,7,3,1,75
+Heavy Blow,0,14,3,0,55
+Superguard,2,5,3,0,60
+Swift-Steps,2,0,3,0,40
+Awaken,2,5,3,1,70
+Forward Slash,0,7,2,0,25
+Deep-Cut,0,5,2,0,25
+Double Attack,0,12,2,0,30
+Pressure Points,0,4,2,0,25
+Raise Attack,2,1,2,0,35
+Fury Slashes,0,9,2,0,30
+Self-Heal,2,7,1,0,15
+Cleanse,2,0,1,0,15
+Block,1,5,1,0,10
+Basic Slash,0,5,1,0,10
+Hollowed Embers,2,4,1,0,18
+Dodge,2,0,1,0,12
+Parry,0,6,1,0,15
+Open Strike,0,10,1,1,25
+Diversion,2,5,1,0,15
+Soften,2,2,1,0,15
+Weak Attack,0,3,1,0,5
+Cower,2,2,1,1,20
+
