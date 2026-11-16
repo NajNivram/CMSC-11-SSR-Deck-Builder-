@@ -154,5 +154,4 @@ void renderBattleScreen(const Battle *battle);
 /* loads card definitions, types, and base stats from an external file (hopefully soon heh) */
 void loadCardDatabase(Card database[], const char *filename);
 
-// kinda important, should not forget
-#endif 
+#endif
