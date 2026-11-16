@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include "../Include/structs_&&_functions.h"
 
-#define MAX_DATABASE_CARDS 100
+#define MAX_DATABASE_CARDS 500
 
 int main(void)
 {
