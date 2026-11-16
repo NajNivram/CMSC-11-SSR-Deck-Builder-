@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include "../Include/structs_&&_functions.h"
 
-#define MAX_DATABASE_CARDS 500
+#define MAX_DATABASE_CARDS 500 // new safety limit for our card array CUZ CYAN HUMOROUSLY SAID 500
 
 int main(void)
 {
