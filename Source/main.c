@@ -16,6 +16,10 @@ int main(void)
     Card cardDatabase[MAX_DATABASE_CARDS];
     loadCardDatabase(cardDatabase, "Assets/cards.csv");
 
+    // for the deckkkkkkkkkkkkkkk of the player, we initialize it with the starting cards from the database/csv file heh
+    Deck playerMasterDeck;
+    initializeStartingDeck(&playerMasterDeck, cardDatabase, MAX_DATABASE_CARDS);
+
     // this is the main game loop that continues until the window is closed
     while (!WindowShouldClose())
     {

@@ -33,7 +33,7 @@ void loadCardDatabase(Card database[], const char *filename) {
         char nameBuffer[MAX_NAME];
         int typeVal, powerVal, rarityVal, onceVal, priceVal;
 
-        // Parse comma-separated values safely with a width specifier (%31[^,]) (basically it reads up to 31 characters or until a comma is found for clarity)
+        // parse comma-separated values safely with a width specifier (%31[^,]) (basically it reads up to 31 characters or until a comma is found for clarity)
         if (sscanf(line, "%31[^,],%d,%d,%d,%d,%d", 
                    nameBuffer, &typeVal, &powerVal, &rarityVal, &onceVal, &priceVal) == 6) {
             
@@ -52,6 +52,7 @@ void loadCardDatabase(Card database[], const char *filename) {
     }
 
     fclose(file);
+    
     //this'll show up in the console when the database is successfully loaded it won't pop in the window tho
     printf("Successfully loaded %d cards from %s into the database.\n", count, filename);
 }
