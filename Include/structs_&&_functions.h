@@ -109,6 +109,9 @@ void shuffleDeck(Deck *deck);
 /* deals cards from draw pile to hand up to MAX_HAND (10) */
 void drawCards(Battle *battle, int count);
 
+/* this initializes the starting deck from that "damned" csv file */
+void initializeStartingDeck(Deck *masterDeck, const Card database[], int databaseSize);
+
 /* calculates bonus hand draw (+0 atk, +2 shield/effect, +3 single-use) */
 int calculateNextDraw(const Card playedCard);
 
