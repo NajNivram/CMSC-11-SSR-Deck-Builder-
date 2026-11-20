@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 /* were using these as global constants to avoid hardcoding
    values later on (we might add more later on i think)     */
@@ -11,6 +12,12 @@
 #define MAX_HAND 10
 #define MAX_DECK 30
 #define MAX_NAME 32
+
+//screen
+typedef enum {
+    SCREEN_MENU,
+    SCREEN_GAMEPLAY
+} GameScreen;
 
 /* the 3 types of cards */
 typedef enum {
@@ -156,5 +163,7 @@ void renderBattleScreen(const Battle *battle);
 
 /* loads card definitions, types, and base stats from an external file (hopefully soon heh) */
 void loadCardDatabase(Card database[], const char *filename);
+
+
 
 #endif
