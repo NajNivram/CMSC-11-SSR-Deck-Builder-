@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.24)
 
+# Get project name from current folder
 get_filename_component(PROJECT_NAME_FROM_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}" NAME)
 
+# Replace spaces with underscores
 string(REPLACE " " "_" PROJECT_NAME_SAFE "${PROJECT_NAME_FROM_FOLDER}")
 
 project(${PROJECT_NAME_SAFE} LANGUAGES C CXX)
@@ -13,6 +15,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# make project folders
 set(PROJECT_FOLDERS
     Source
     Include
@@ -25,10 +28,12 @@ set(PROJECT_FOLDERS
     Assets/Extra
 )
 
+# Create the folders if they don't exist
 foreach(folder ${PROJECT_FOLDERS})
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${folder}")
 endforeach()
 
+# Create a main.c file with a simple raylib example if it doesn't exist
 set(MAIN_C_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Source/main.c")
 
 if(NOT EXISTS "${MAIN_C_PATH}")
@@ -62,8 +67,10 @@ endif()
 
 include(FetchContent)
 
+# Do not build raylib examples
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
+# Fetch raylib 6.0
 FetchContent_Declare(
     raylib
     GIT_REPOSITORY https://github.com/raysan5/raylib.git
@@ -73,6 +80,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(raylib)
 
+# Fetch SDL 3.2.10
 FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
@@ -82,6 +90,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SDL3)
 
+# Gather all source and header files
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp"
@@ -92,6 +101,7 @@ file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/Include/*.hpp"
 )
 
+# Create the executable target
 add_executable(${PROJECT_NAME_SAFE}
     ${SOURCE_FILES}
     ${HEADER_FILES}
@@ -101,8 +111,10 @@ target_include_directories(${PROJECT_NAME_SAFE} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/Include"
 )
 
+# Link raylib and SDL3 to the project
 target_link_libraries(${PROJECT_NAME_SAFE} PRIVATE raylib SDL3::SDL3)
 
+# Copy the Assets folder to the output directory after building
 add_custom_command(
     TARGET ${PROJECT_NAME_SAFE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -111,5 +123,6 @@ add_custom_command(
     COMMENT "Copying Assets folder..."
 )
 
+# Make this the startup project in Visual Studio, just for convenience
 set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME_SAFE})
 
