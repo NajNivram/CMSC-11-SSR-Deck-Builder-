@@ -4,6 +4,41 @@
 
 #define MAX_DATABASE_CARDS 500 // new safety limit for our card array CUZ CYAN HUMOROUSLY SAID 500
 
+//our button
+bool DrawButton(Rectangle bounds, const char *text, int fontSize, Color baseColor, Color hoverColor, Color pressColor, Color textColor) 
+{
+    Vector2 mousePoint = GetMousePosition();
+    bool isHovered = CheckCollisionPointRec(mousePoint, bounds);
+    bool isClicked = false;
+
+    Color currentColor = baseColor;
+
+    if (isHovered) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            currentColor = pressColor;
+        } else {
+            currentColor = hoverColor;
+        }
+
+        // Trigger action on release (standard UI behavior)
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            isClicked = true;
+        }
+    }
+
+    // Draw button background and border
+    DrawRectangleRec(bounds, currentColor);
+    DrawRectangleLinesEx(bounds, 2, DARKGRAY);
+
+    // Center text inside the button
+    int textWidth = MeasureText(text, fontSize);
+    int textX = (int)(bounds.x + (bounds.width - textWidth) / 2);
+    int textY = (int)(bounds.y + (bounds.height - fontSize) / 2);
+    DrawText(text, textX, textY, fontSize, textColor);
+
+    return isClicked;
+}
+
 // this is the main function that initializes the window and loads the card database
 int main(void)
 {
@@ -40,41 +75,6 @@ int main(void)
     Texture2D background = LoadTexture("Assets/Sprites/ui elements/StartScreen.png");
     Texture2D logo = LoadTexture("Assets/Sprites/ui elements/StartScreenLogo.png");
     Texture2D Hero = LoadTexture("Assets/Sprites/placeholder assets/p_idl_kurokami.png");
-
-
-    //our button
-    bool DrawButton(Rectangle bounds, const char *text, int fontSize, Color baseColor, Color hoverColor, Color pressColor, Color textColor) {
-    Vector2 mousePoint = GetMousePosition();
-    bool isHovered = CheckCollisionPointRec(mousePoint, bounds);
-    bool isClicked = false;
-
-    Color currentColor = baseColor;
-
-    if (isHovered) {
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-            currentColor = pressColor;
-        } else {
-            currentColor = hoverColor;
-        }
-
-        // Trigger action on release (standard UI behavior)
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            isClicked = true;
-        }
-    }
-
-    // Draw button background and border
-    DrawRectangleRec(bounds, currentColor);
-    DrawRectangleLinesEx(bounds, 2, DARKGRAY);
-
-    // Center text inside the button
-    int textWidth = MeasureText(text, fontSize);
-    int textX = (int)(bounds.x + (bounds.width - textWidth) / 2);
-    int textY = (int)(bounds.y + (bounds.height - fontSize) / 2);
-    DrawText(text, textX, textY, fontSize, textColor);
-
-    return isClicked;
-    }
 
     GameScreen currentScreen = SCREEN_MENU;
     
