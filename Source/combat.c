@@ -141,6 +141,39 @@ int retractCardFromSlot(Battle *battle, int slotIndex) {
     return 1;
 }
 
+// added 11/22/26: taints a card in the player's hand, sending it to the discard pile and drawing 4 new cards
+int taintCard(Battle *battle, int handIndex) {
+    if (handIndex < 0 || handIndex >= battle->hand_count) return 0;
+
+    // creates the Tarnished / Overclock card
+    Card tarnished_card;
+    memset(&tarnished_card, 0, sizeof(Card));
+    strcpy(tarnished_card.name, "Tarnished");
+    tarnished_card.type = CARD_EFFECT;
+    tarnished_card.power = 0;
+    tarnished_card.rarity = 1;
+    tarnished_card.is_once_per_encounter = 0; 
+    tarnished_card.is_active = 0;             
+    tarnished_card.price = 0;
+
+    // sends the tarnished card to the discard pile
+    if (battle->discard_pile.count < MAX_DECK) {
+        battle->discard_pile.card[battle->discard_pile.count] = tarnished_card;
+        battle->discard_pile.count++;
+    }
+
+    // shifts remaining hand cards to fill the gap
+    for (int i = handIndex; i < battle->hand_count - 1; i++) {
+        battle->hand[i] = battle->hand[i + 1];
+    }
+    battle->hand_count--;
+
+    // draws 4 cards as reward/penalty for tainting
+    drawCards(battle, 4);
+
+    return 1;
+}
+
 // this function generates the enemy's move for the current round
 // by randomly selecting two distinct board slots and assigning them 
 // either an attack or shield card based on the round number.
@@ -227,9 +260,54 @@ void resolveCombatTurn(Battle *battle) {
     }
 }
 
+//added 11/22/26: this function processes the active buffs and debuffs for a given fighter,
+//applying their effects and decrementing their durations. in simple terms, it handles the ongoing effects of status conditions like regeneration or poison.
+static void process_fighter_statuses(Fighter *fighter) {
+    // processes Active Buffs (e.g., Regeneration)
+    if (fighter->active_buff.id != STATUS_NONE && fighter->active_buff.duration > 0) {
+        if (fighter->active_buff.value > 0) {
+            fighter->current_hp += fighter->active_buff.value;
+            if (fighter->current_hp > fighter->max_hp) {
+                fighter->current_hp = fighter->max_hp;
+            }
+        }
+        fighter->active_buff.duration--;
+        if (fighter->active_buff.duration <= 0) {
+            fighter->active_buff.id = STATUS_NONE;
+            fighter->active_buff.duration = 0;
+            fighter->active_buff.value = 0;
+        }
+    }
+
+    // processes Active Debuffs (e.g., Burning, Poisoned, Bleeding)
+    if (fighter->active_debuff.id != STATUS_NONE && fighter->active_debuff.duration > 0) {
+        if (fighter->active_debuff.value > 0) {
+            fighter->current_hp -= fighter->active_debuff.value;
+            if (fighter->current_hp < 0) {
+                fighter->current_hp = 0;
+            }
+        }
+        fighter->active_debuff.duration--;
+        if (fighter->active_debuff.duration <= 0) {
+            fighter->active_debuff.id = STATUS_NONE;
+            fighter->active_debuff.duration = 0;
+            fighter->active_debuff.value = 0;
+        }
+    }
+}
+
+// Evaluates active buff and debuff slots for both player and enemy and decrements duration counters
+void applyStatusEffects(Battle *battle) {
+    process_fighter_statuses(&battle->player);
+    process_fighter_statuses(&battle->enemy);
+}
+
 // this function advances the battle to the next round by discarding spent cards,
 // exiling single-use cards, and drawing new cards for the player.
 void advanceRound(Battle *battle) {
+    // just added this 11/23/26: didnt realize this was causing the problems cuz i didnt call it in the first place,
+    //but now it should apply buffs/debuffs at the start of each round
+    applyStatusEffects(battle);
     // moves spent player cards to discard pile or exile if once-per-encounter
     for (int i = 0; i < BOARD_SLOTS; i++) {
         if (battle->player_slots[i].is_active) {
