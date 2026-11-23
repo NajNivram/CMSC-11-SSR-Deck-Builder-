@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 //this body of code until line 17 is a helper function to create an empty card with default values,
 //used for clearing board slots and initializing card arrays.
@@ -209,8 +210,13 @@ void generateEnemyMove(Battle *battle) {
     battle->enemy_slots[slot_1] = enemy_attack;
     battle->enemy_slots[slot_2] = (battle->round_number % 2 == 1) ? enemy_attack : enemy_guard;
 }
+// just edited this 11/23/26: it used to only just apply damage and shield,
+// but now it also checks for active buffs/debuffs and applies their effects at the start of each round.
+// so that if a player has a regeneration buff or is poisoned, those effects will be processed before the next round of combat begins.
+// man fuck this shi
+static void apply_status_to_fighter(Fighter *target, StatusID id, int duration, int value);
 
-// this functions prpose is to resolve the combat turn by
+// this function's purpose is to resolve the combat turn by
 // processing each player's and enemy's card in their respective board slots.
 void resolveCombatTurn(Battle *battle) {
     battle->next_round_draw = 0;
@@ -220,9 +226,24 @@ void resolveCombatTurn(Battle *battle) {
         Card *p_card = &battle->player_slots[i];
         if (p_card->is_active) {
             if (p_card->type == CARD_ATTACK) {
+                int initial_enemy_shield = battle->enemy.shield;
                 apply_damage_to_fighter(&battle->enemy, p_card->power);
+                
+                // Card Conditional: Check if attack broke shield (e.g., Deep-Cut)
+                bool shield_broken = (initial_enemy_shield > 0 && battle->enemy.shield == 0);
+
+                if (strcmp(p_card->name, "Deep-Cut") == 0 && shield_broken) {
+                    apply_damage_to_fighter(&battle->enemy, 14); // Bonus damage on shield break
+                } else if (strcmp(p_card->name, "Tipped Slash") == 0) {
+                    apply_status_to_fighter(&battle->enemy, STATUS_DEBUFF, 3, 3); // Apply poison/burning stack
+                }
             } else if (p_card->type == CARD_SHIELD) {
                 battle->player.shield += p_card->power;
+                
+                // Card Conditional: Ultimate Regeneration
+                if (strcmp(p_card->name, "Ultimate Regeneration") == 0) {
+                    apply_status_to_fighter(&battle->player, STATUS_BUFF, 3, 3); // Regeneration buff
+                }
             } else if (p_card->type == CARD_EFFECT) {
                 // handles self-heal vs magic/utility effects
                 if (strstr(p_card->name, "Heal") != NULL || strstr(p_card->name, "Superguard") != NULL) {
@@ -230,6 +251,9 @@ void resolveCombatTurn(Battle *battle) {
                     if (battle->player.current_hp > battle->player.max_hp) {
                         battle->player.current_hp = battle->player.max_hp;
                     }
+                } else if (strcmp(p_card->name, "Hollowed Embers") == 0) {
+                    apply_damage_to_fighter(&battle->enemy, p_card->power);
+                    apply_status_to_fighter(&battle->enemy, STATUS_DEBUFF, 3, 3); // Burning debuff
                 } else {
                     apply_damage_to_fighter(&battle->enemy, p_card->power);
                 }
@@ -293,6 +317,36 @@ static void process_fighter_statuses(Fighter *fighter) {
             fighter->active_debuff.duration = 0;
             fighter->active_debuff.value = 0;
         }
+    }
+}
+
+// added this 11/23/26: applies a buff or debuff to a fighter following Cyan's non-stacking rules:
+// - Same ID: Extends the duration.
+// - Different ID / New: Overwrites the current status.
+// basically this function manages the application of status effects to a fighter,
+// ensuring that buffs and debuffs are handled according to the game's rules regarding stacking and overwriting.
+static void apply_status_to_fighter(Fighter *target, StatusID id, int duration, int value) {
+    // determines if the status being applied is a buff or debuff based on the provided StatusID.
+    bool is_buff = (id == STATUS_BUFF); 
+
+    // then it selects the appropriate status slot (active_buff or active_debuff) based on whether it's a buff or debuff.
+    StatusEffect *target_slot = is_buff ? &target->active_buff : &target->active_debuff;
+
+    // up next it then checks the current status in the target slot and applies the new status effect according to the rules:
+    if (target_slot->id == STATUS_NONE) {
+        // if no status is currently active, it simply applies the new status effect.
+        target_slot->id = id;
+        target_slot->duration = duration;
+        target_slot->value = value;
+    } else if (target_slot->id == id) {
+        // if else the same status type is already active, it extends the duration and adds to the value.
+        target_slot->duration += duration;
+        target_slot->value += value;
+    } else {
+        // however, if a different status type is active, it overwrites the current status with the new one.
+        target_slot->id = id;
+        target_slot->duration = duration;
+        target_slot->value = value;
     }
 }
 
