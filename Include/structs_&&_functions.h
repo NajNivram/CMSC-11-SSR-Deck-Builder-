@@ -1,6 +1,7 @@
 #ifndef GAME_DEFS_H
 #define GAME_DEFS_H
 
+#include "raylib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +17,12 @@
 //screen
 typedef enum {
     SCREEN_MENU,
-    SCREEN_GAMEPLAY
+    SCREEN_GAMEPLAY,
+    SCREEN_BATTLE,
+    SCREEN_SHOP,
+    SCREEN_CAMP,
+    SCREEN_EVENT,
+    SCREEN_MAP
 } GameScreen;
 
 /* the 3 types of cards */
@@ -61,6 +67,11 @@ typedef struct {
     StatusEffect active_buff;   /* this should hold up to 1 active buff */
     StatusEffect active_debuff; /* same for this but for debuff */
 } Fighter;
+
+typedef struct {
+    Fighter player;
+    //prolly gonna add more here
+} MC;
 
 /* this struct represents card collections
    for both the draw and discard pile       */
@@ -163,7 +174,5 @@ void renderBattleScreen(const Battle *battle);
 
 /* loads card definitions, types, and base stats from an external file (hopefully soon heh) */
 void loadCardDatabase(Card database[], const char *filename);
-
-
 
 #endif
