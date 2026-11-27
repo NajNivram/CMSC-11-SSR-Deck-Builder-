@@ -1,0 +1,50 @@
+{
+	"abstract" : true,
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library"
+		],
+		"files" : 
+		[
+			"build/_deps/sdl3-src/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 3350,
+				"parent" : 0
+			}
+		]
+	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 12
+	},
+	"id" : "SDL3_Headers::@405c074760d2f6728126",
+	"interfaceIncludes" : 
+	[
+		{
+			"path" : "C:/Users/jadeo/Documents/C/Final Project/CMSC-11-SSR-Deck-Builder-/build/_deps/sdl3-build/include-revision"
+		},
+		{
+			"path" : "C:/Users/jadeo/Documents/C/Final Project/CMSC-11-SSR-Deck-Builder-/build/_deps/sdl3-src/include"
+		}
+	],
+	"name" : "SDL3_Headers",
+	"paths" : 
+	{
+		"build" : "_deps/sdl3-build",
+		"source" : "build/_deps/sdl3-src"
+	},
+	"sources" : [],
+	"type" : "INTERFACE_LIBRARY"
+}

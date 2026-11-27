@@ -3,46 +3,38 @@
 #include <stdlib.h>
 #include <time.h>
 
-// this assigns the tile types to the map array based on the floor size and area number, ensuring a mix of combat, shop, event, and milestone tiles
-typedef enum {
-    TILE_EMPTY = 0,
-    TILE_COMBAT,    // Standard fight
-    TILE_ELITE,     // Elite fight
-    TILE_SHOP,      // Merchant shop
-    TILE_CAMP,      // Campfire / Rest
-    TILE_EVENT,     // Random mystery event
-    TILE_MINIBOSS,  // Mini-boss fight
-    TILE_BOSS       // Area Boss
-} TileType;
-
 // starting here this handles map generation and navigation(like player movement and many more)
 
-// will build our map array for the current area, filling it with the appropriate tile types based on the floor size and area number
-void generateAreaMap(int map[], int floorSize, int areaNumber) {
-    for (int i = 0; i < floorSize; i++) {
-        
-        // 1. checks if it's the final tile (or the Area Boss)
-        if (i == floorSize - 1) {
-            map[i] = TILE_BOSS;
-        }
-        // 2. cecks if it's a 10th tile milestone (the Mini-Boss)
-        else if ((i + 1) % 10 == 0) {
-            map[i] = TILE_MINIBOSS;
-        }
-        // 3. check if it's a 5th or 15th tile milestone (Camp)
-        else if ((i + 1) % 5 == 0) {
-            map[i] = TILE_CAMP;
-        }
-        else {
-            // Randomly roll intermediate tile types (Combat, Shop, or Event)
-            int roll = rand() % 100;
-            if (roll < 60) {
-                map[i] = TILE_COMBAT; // 60% chance for standard combat
-            } else if (roll < 80) {
-                map[i] = TILE_SHOP;   // 20% chance for a shop
-            } else {
-                map[i] = TILE_EVENT;  // 20% chance for a random event
-            }
+static MapTileType generateRandomTile(void) {
+    const int roll = rand() % 100;
+    if (roll < 60) return MAP_TILE_COMBAT;
+    if (roll < 80) return MAP_TILE_SHOP;
+    return MAP_TILE_EVENT;
+}
+
+bool mapStepHasBranches(int step) {
+    return (step >= 1 && step <= 5) || (step >= 8 && step <= 12);
+}
+
+void generateAreaMap(MapStep map[], int floorSize, int areaNumber) {
+    (void)areaNumber;
+
+    for (int step = 0; step < floorSize; step++) {
+        if (step == 0) {
+            map[step].top = MAP_TILE_START;
+            map[step].bottom = MAP_TILE_START;
+        } else if (step == 6 || step == 13) {
+            map[step].top = MAP_TILE_CAMP;
+            map[step].bottom = MAP_TILE_CAMP;
+        } else if (step == 7) {
+            map[step].top = MAP_TILE_MINIBOSS;
+            map[step].bottom = MAP_TILE_MINIBOSS;
+        } else if (step == 14) {
+            map[step].top = MAP_TILE_BOSS;
+            map[step].bottom = MAP_TILE_BOSS;
+        } else {
+            map[step].top = generateRandomTile();
+            map[step].bottom = generateRandomTile();
         }
     }
 }
@@ -50,16 +42,45 @@ void generateAreaMap(int map[], int floorSize, int areaNumber) {
 // handles the players movement through the map,
 // returning the next tile index based on the current
 // position and ensuring it doesn't exceed the bounds of the map array
-int selectNextTile(const int map[], int currentPosition) {
-    int nextPosition = currentPosition + 1;
-    
-    // bound checker: makes sure we don't walk past the end of the map array
-    // (Assuming floorSize is handled or passed, but a safe array limit check can go here)
-    if (nextPosition < 0) {
+int selectNextTile(const MapStep map[], int currentPosition, int floorSize) {
+    if (map == NULL || currentPosition < 0 || currentPosition >= floorSize) {
         return -1;
     }
-    
-    return nextPosition;
+
+    return currentPosition + 1;
+}
+
+const char *mapTileLabel(MapTileType tileType) {
+    switch (tileType) {
+        case MAP_TILE_START: return "START";
+        case MAP_TILE_COMBAT: return "COMBAT";
+        case MAP_TILE_ELITE: return "ELITE";
+        case MAP_TILE_SHOP: return "SHOP";
+        case MAP_TILE_CAMP: return "CAMP";
+        case MAP_TILE_EVENT: return "EVENT";
+        case MAP_TILE_MINIBOSS: return "MINIBOSS";
+        case MAP_TILE_BOSS: return "BOSS";
+        default: return "UNKNOWN";
+    }
+}
+
+GameScreen mapTileScreen(MapTileType tileType) {
+    switch (tileType) {
+        case MAP_TILE_START: return SCREEN_GAMEPLAY;
+        case MAP_TILE_COMBAT:
+        case MAP_TILE_ELITE:
+        case MAP_TILE_MINIBOSS:
+        case MAP_TILE_BOSS:
+            return SCREEN_BATTLE;
+        case MAP_TILE_SHOP:
+            return SCREEN_SHOP;
+        case MAP_TILE_CAMP:
+            return SCREEN_CAMP;
+        case MAP_TILE_EVENT:
+            return SCREEN_EVENT;
+        default:
+            return SCREEN_MAP;
+    }
 }
 
 // STARTING DOWN HERE THIS HANDLES THE SHOP AND CAMP MECHANICS and all that good stuff
@@ -135,25 +156,25 @@ void handleCamp(Deck *masterDeck, int *playerHP, int maxHP, int *soulPoints, int
 // and handle random events that can occur in the game
 
 // routes the player to the correct game subsystem depending on the tile type they landed on
-void resolveTileEvent(int tileType, int *playerHP, int *soulPoints, Deck *masterDeck) {
+void resolveTileEvent(MapTileType tileType, int *playerHP, int *soulPoints, Deck *masterDeck) {
     switch (tileType) {
-        case TILE_COMBAT:
-        case TILE_ELITE:
-        case TILE_MINIBOSS:
-        case TILE_BOSS:
+        case MAP_TILE_COMBAT:
+        case MAP_TILE_ELITE:
+        case MAP_TILE_MINIBOSS:
+        case MAP_TILE_BOSS:
             // combat tiles trigger battle encounters (managed via combat.c)
             break;
             
-        case TILE_SHOP:
+        case MAP_TILE_SHOP:
             handleShop(masterDeck, soulPoints);
             break;
             
-        case TILE_CAMP:
+        case MAP_TILE_CAMP:
             // default maxHP set to 100 and area deck limit set to 20 for backend safety
             handleCamp(masterDeck, playerHP, 100, soulPoints, 20);
             break;
             
-        case TILE_EVENT:
+        case MAP_TILE_EVENT:
             // triggers random mystery events (placeholder event 1, choice 1)
             triggerRandomEvent(1, 1, playerHP, soulPoints, masterDeck);
             break;
@@ -181,7 +202,7 @@ void triggerRandomEvent(int eventID, int choiceIndex, int *playerHP, int *soulPo
 }
 
 // handles moving from one completed area to the next after defeating the area boss
-void advanceToNextArea(int *currentArea, int *currentFloor, int map[], int floorSize) {
+void advanceToNextArea(int *currentArea, int *currentFloor, MapStep map[], int floorSize) {
     // bump up the area difficulty counter
     (*currentArea)++;
     

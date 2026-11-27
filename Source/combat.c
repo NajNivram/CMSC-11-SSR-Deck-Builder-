@@ -1,4 +1,5 @@
 #include "../Include/structs.h"
+#include "../Include/deck.h"
 #include "combat.h"
 #include <stdlib.h>
 #include <string.h>
