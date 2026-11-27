@@ -91,12 +91,7 @@ int main(void)
             currentScreen = SCREEN_MAP;
         }
 
-        // if (DrawClearButton(ExitBtn, "Exit", 40, WHITE)) {
-        //     CloseWindow();
-        //     return 0;
-        // }
-
-        if (DrawButton(ExitBtn, "Exit", 40, LIGHTGRAY, GRAY, DARKGRAY, WHITE)) {
+        if (DrawClearButton(ExitBtn, "Exit", 40, WHITE, LIGHTGRAY)) {
             CloseWindow();
             return 0;
         }
