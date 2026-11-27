@@ -1,4 +1,5 @@
-#include "../Include/structs_&&_functions.h"
+#include "../Include/structs.h"
+#include "map.h"
 #include <stdlib.h>
 #include <time.h>
 

@@ -1,4 +1,5 @@
-#include "../Include/structs_&&_functions.h"
+#include "../Include/structs.h"
+#include "deck.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
